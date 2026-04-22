@@ -1,0 +1,100 @@
+/* ========================================================
+   MEDIDAS DE INTELIGÊNCIA TEMPORAL (TIME INTELLIGENCE)
+   Objetivo: Comparações Mensais e Anuais (MoM, YoY, YTD)
+   ======================================================== */
+
+// Base para todos os cálculos temporais
+Sales = SUM(F_Sales[Sales])
+
+-----------------------------------------------------------
+
+/* MEDIDA: Sales LM (Last Month)
+DESCRIÇÃO: Retorna o valor de vendas do mês imediatamente anterior.
+*/
+Sales LM = 
+VAR LM =
+    CALCULATE(
+        [Sales];
+        DATEADD(
+            D_Calendario[Date];
+            -1;
+            MONTH
+        )
+)
+RETURN
+IF([Sales]; LM)
+
+// Cálculos de Variação Mensal (Last Month)
+Sales LM Delta = [Sales] - [Sales LM]
+
+Sales LM Delta % = DIVIDE([Sales LM Delta]; [Sales LM])
+
+-----------------------------------------------------------
+
+/* MEDIDA: Sales LY (Last Year)
+DESCRIÇÃO: Retorna o valor de vendas do mesmo período no ano anterior.
+*/
+Sales LY = 
+VAR YoY =
+    CALCULATE(
+        [Sales];
+        SAMEPERIODLASTYEAR(D_Calendario[Date])
+    )
+RETURN
+IF([Sales]; YoY)
+
+// Cálculos de Variação Anual (Last Year)
+Sales LY Delta = [Sales] - [Sales LY]
+
+Sales LY Delta % = DIVIDE([Sales LY Delta]; [Sales LY])
+
+-----------------------------------------------------------
+
+/* MEDIDA: Sales MOM (Month over Month)
+DESCRIÇÃO: Retorna o valor de vendas do mesmo período no mês anterior.
+*/
+Sales MOM = 
+VAR MoM =
+    CALCULATE(
+        [Sales];
+        DATEADD(
+        	D_Calendario[Mês];
+        	-1;
+        	MONTH
+        )
+    )
+RETURN
+IF([Sales]; MoM)
+
+Sales MOM Delta = [Sales] - [Sales MOM]
+
+Sales MOM Delta % = DIVIDE([Sales MOM Delta]; [Sales MOM])
+
+-----------------------------------------------------------
+
+/* MEDIDAS YTD (Year To Date)
+DESCRIÇÃO: Acumulado de vendas do início do ano até a data atual do contexto.
+*/
+Sales YTD = 
+TOTALYTD(
+    [Sales];
+    D_Calendario[Date]
+)
+
+/* Sales YTD LY: Acumulado do ano passado até o mesmo período.
+   Permite comparar, por exemplo, o acumulado de Jan-Abr de 2026 com Jan-Abr de 2025.
+*/
+Sales YTD LY = 
+CALCULATE(
+    [Sales YTD];
+    DATEADD(
+        D_Calendario[Date];
+        -1;
+        YEAR
+    )
+)
+
+// Cálculos de Variação do Acumulado Anual
+Sales YTD LY Delta = [Sales YTD] - [Sales YTD LY]
+
+Sales YTD LY Delta % = DIVIDE([Sales YTD LY Delta]; [Sales YTD LY])

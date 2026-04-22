@@ -1,0 +1,83 @@
+/* MEDIDA: AVG Days to Ship
+DESCRIÇÃO: Calcula a média de dias entre o pedido e o envio, iterando linha a linha na tabela de vendas.
+INSIGHT: Utilizada para monitorar a eficiência logística e prazos de entrega.
+*/
+AVG Days to Ship = 
+AVERAGEX(
+    F_Sales;
+    DATEDIFF(
+        F_Sales[Order Date];
+        F_Sales[Ship Date];
+        DAY
+    )
+)
+
+-----------------------------------------------------------
+
+/* MEDIDA: AVG Discount %
+DESCRIÇÃO: Média simples do percentual de desconto aplicado nas vendas.
+*/
+AVG Discount % = 
+AVERAGE(F_Sales[Discount])
+
+-----------------------------------------------------------
+
+/* MEDIDA: Profit LY (Last Year)
+DESCRIÇÃO: Calcula o Lucro Total do mesmo período do ano anterior.
+*/
+Profit LY = 
+CALCULATE(
+    [Total Profit];
+    SAMEPERIODLASTYEAR(D_Calendario[Date])
+)
+
+-----------------------------------------------------------
+
+/* MEDIDA: Profit Margin %
+DESCRIÇÃO: Retorna a rentabilidade real (Margem de Lucro) sobre as vendas.
+*/
+Profit Margin % = 
+DIVIDE(
+    [Total Profit];
+    [Total Sales];
+    0
+)
+
+-----------------------------------------------------------
+
+/* MEDIDA: Sales LY (Last Year)
+DESCRIÇÃO: Retorna o valor de vendas do ano anterior, com trava de segurança para só exibir se houver vendas no período atual.
+*/
+Sales LY = 
+VAR YoY =
+    CALCULATE(
+        [Total Sales]; // Ajustado para sua medida padrão
+        SAMEPERIODLASTYEAR(D_Calendario[Date])
+    )
+RETURN
+IF(
+    [Total Sales]; 
+    YoY
+)
+
+-----------------------------------------------------------
+
+/* MEDIDA: Sales YoY % (Growth)
+DESCRIÇÃO: Variação percentual de vendas (Ano Atual vs Ano Anterior). 
+OBS: Certifique-se de que a medida [Sales LY 1] no seu modelo é a mesma que a [Sales LY] acima.
+*/
+Sales YoY % = 
+DIVIDE(
+    [Total Sales] - [Sales LY]; 
+    [Sales LY];
+    0
+)
+
+-----------------------------------------------------------
+
+// Somas Básicas (KPIs de Volume)
+Total Profit = SUM(F_Sales[Profit])
+
+Total Quantity = SUM(F_Sales[Quantity])
+
+Total Sales = SUM(F_Sales[Sales])
